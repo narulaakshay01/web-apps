@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Demo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round|Open+Sans">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<style>
+body {
+    color: #404E67;
+    background: #F5F7FA;
+    font-family: 'Open Sans', sans-serif;
+}
+.table-wrapper {
+    margin: 30px auto;
+    background: #fff;
+    padding: 20px;	
+    box-shadow: 0 1px 1px rgba(0,0,0,.05);
+}
+.table-title {
+    padding-bottom: 10px;
+    margin: 0 0 10px;
+}
+.table-title h2 {
+    margin: 6px 0 0;
+    font-size: 22px;
+}
+.table-title .add-new {
+    float: right;
+    height: 30px;
+    font-weight: bold;
+    font-size: 12px;
+    text-shadow: none;
+    min-width: 100px;
+    border-radius: 50px;
+    line-height: 13px;
+}
+.table-title .add-new i {
+    margin-right: 4px;
+}
+table.table {
+    table-layout: fixed;
+}
+table.table tr th, table.table tr td {
+    border-color: #e9e9e9;
+}
+table.table th i {
+    font-size: 13px;
+    margin: 0 5px;
+    cursor: pointer;
+}
+table.table th:last-child {
+    width: 100px;
+}
+table.table td a {
+    cursor: pointer;
+    display: inline-block;
+    margin: 0 5px;
+    min-width: 24px;
+}    
+table.table td a.add {
+    color: #27C46B;
+}
+table.table td a.edit {
+    color: #FFC107;
+}
+table.table td a.delete {
+    color: #E34724;
+}
+table.table td i {
+    font-size: 19px;
+}
+table.table td a.add i {
+    font-size: 24px;
+    margin-right: -1px;
+    position: relative;
+    top: 3px;
+}    
+table.table .form-control {
+    height: 32px;
+    line-height: 32px;
+    box-shadow: none;
+    border-radius: 2px;
+}
+table.table .form-control.error {
+    border-color: #f50000;
+}
+table.table td .add {
+    display: none;
+}
+</style>
+<script>
+$(document).ready(function(){
+	$(".query").click(function(e) {
+		$("#userTable").html("")
+		$("#authorTable").html("")
+		$("#reviewerTable").html("")
+		tab=$(this).attr('data-table');
+		where=$("#"+tab+"name").val();
+		if(where==''){
+			uri="http://localhost:5902/demo/"+tab+"/all";
+		}else{
+		uri="http://localhost:5902/demo/"+tab+"/"+where;
+		}
+		
+		$.ajax({
+			url: uri,
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			type: 'GET',
+			dataTypes: 'application/json', // added data type
+			success: function(res) {
+			
+				table='<div class="table-responsive"><div class="table-wrapper"><div class="table-title"><div class="row"><div class="col-sm-8"><h2>'+tab+' <b>Details</b></h2></div><div class="col-sm-4"><button type="button" class="btn btn-info add-new" data-table="'+tab+'"><i class="fa fa-plus"></i> Add New</button></div></div></div><table class="table table-bordered"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Actions</th></tr></thead><tbody>';
+				
+				
+				for(var i = 0; i < res.length; i++) {
+					 table+='<tr id='+res[i].id+' data-table="'+tab+'"><td>'+res[i].id+'</td><td>'+res[i].name+'</td><td>'+res[i].email+'</td><td><a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a><a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a><a class="delete" title="Delete" data-toggle="tooltip"><i class="material-icons">&#xE872;</i></a></td></tr>';
+				}								
+				table+='</tbody></table></div></div>';
+				$("#"+tab+"Table").html(table)
+			},
+			error: function(xhr, status, error) {
+			  var err = eval("(" + xhr.responseText + ")");
+			  alert(err.Message);
+			},
+			complete: function() {
+				console.log("done");
+			}
+		});
+		
+	});
+	
+	// Append table with add row form on add new button click
+    $(document).on("click",".add-new", function(){
+		var actions = $("table td:last-child").html();
+		$(this).attr("disabled", "disabled");
+		var index = $("table tbody tr:last-child").index();
+		if($(this).attr('data-table')=='user'){
+		var row = '<tr data-table="user">';
+		}
+		else if ($(this).attr('data-table')=='author'){
+		var row = '<tr data-table="author">';
+		}
+		else if ($(this).attr('data-table')=='reviewer'){
+		var row = '<tr data-table="reviewer">';
+		}
+		
+		row+='<td><input type="text" class="form-control" id="addid" name="id" disabled=true value="X"></td>' +
+            '<td><input type="text" class="form-control" name="name" id="addname"></td>' +
+            '<td><input type="email" class="form-control" name="email" id="addemail"></td>' +
+			'<td>' + actions + '</td>' +
+        '</tr>';
+    	$("table").append(row);		
+		$("table tbody tr").eq(index + 1).find(".add, .edit").toggle();
+    });
+	
+	// Add row on add button click
+	$(document).on("click", ".add", function(){
+		var empty = false;
+		var input = $(this).parents("tr").find('input[type="text"]');
+        input.each(function(){
+			if(!$(this).val()){
+				$(this).addClass("error");
+				empty = true;
+			} else{
+                $(this).removeClass("error");
+            }
+		});
+		$(this).parents("tr").find(".error").first().focus();
+		if(!empty){
+			
+			table=$(this).parents("tr").attr('data-table');
+			if($("#addid").val()=='X'){
+				dat={"name":$("#addname").val(),"email":$("#addemail").val()}
+			}
+			else{
+				dat={"id":$("#addid").val() ,"name":$("#addname").val(),"email":$("#addemail").val()}
+			}
+			$.ajax({
+				url: "http://localhost:5902/demo/"+table+"/create",
+				type: 'POST',
+				data: JSON.stringify(dat),
+				headers: {
+				'Content-Type': 'application/json'
+				},
+				dataTypes: 'application/json', // added data type
+				success: function(res) {
+				
+				},
+				error: function(xhr, status, error) {
+				  var err = eval("(" + xhr.responseText + ")");
+				  alert(err);
+				},
+				complete: function() {
+					$(this).parents("tr").find(".add, .edit").toggle();
+					$(".add-new").removeAttr("disabled");
+					$("#"+table+"btn").click()
+				}
+			});
+			
+		}		
+    });
+	
+	
+	// Edit row on edit button click
+	$(document).on("click", ".edit", function(){
+		count=0
+        $(this).parents("tr").find("td:not(:last-child)").each(function(){
+			if(count==0){
+				$(this).html('<input type="text" id="addid" class="form-control" value="' + $(this).text() + '" disabled=true>');
+			}else if(count==1){
+				$(this).html('<input type="text" id="addname" class="form-control" value="' + $(this).text() + '">');
+			}else{
+				$(this).html('<input type="text" id="addemail" class="form-control" value="' + $(this).text() + '">');
+			}
+			count++;
+		});		
+		$(this).parents("tr").find(".add, .edit").toggle();
+		$(".add-new").attr("disabled", "disabled");
+    });
+
+
+
+	// Delete row on delete button click
+	$(document).on("click", ".delete", function(){
+		table=$(this).parents("tr").attr('data-table');
+		if($(this).parents("tr").attr('id')){
+		$.ajax({
+			url: "http://localhost:5902/demo/"+table+"/delete/"+$(this).parents("tr").attr('id'),
+			type: 'GET',
+			success: function(res) {
+			
+			},
+			error: function(xhr, status, error) {
+			  var err = eval("(" + xhr.responseText + ")");
+			  alert(err);
+			},
+			complete: function() {
+
+			}
+		});
+		}
+		$(".add-new").removeAttr("disabled");
+		setTimeout(function(){
+		  $("#"+table+"btn").click();
+		}, 200);
+		
+    });
+});
+</script>
+</head>
+<body>
+<div class="container-fluid">
+			<div class="row content margin">
+				<div class="col-md-12">
+					<ul class="nav nav-tabs" role="tablist">
+						<li class="nav-item">
+						  <a class="nav-link active" data-toggle="tab" href="#user">User</a>
+						</li>
+						<li class="nav-item">
+						  <a class="nav-link" data-toggle="tab" href="#author">Author</a>
+						</li>
+						<li class="nav-item">
+						  <a class="nav-link" data-toggle="tab" href="#reviewer">Reviewer</a>
+						</li>
+					</ul>
+
+					  <!-- Tab panes -->
+					<div class="tab-content">
+						<div id="user" class="container tab-pane active"><br>
+							
+							<form class="form">
+								<input type="text" class="form-control" id="username" placeholder="Enter Name" name="name">
+								<br>
+								<button type="button" class="form-control query" data-table="user" id="userbtn" class="btn btn-primary form-control">Get Users</button>
+							</form>
+							<div id="userTable"></div>
+							
+						</div>
+						<div id="author" class="container tab-pane fade"><br>
+						  <form class="form">
+								<input type="text" class="form-control" id="authorname" placeholder="Enter Name" name="name">
+								<br>
+								<button type="button" class="form-control query" data-table="author" id="authorbtn" class="btn btn-primary form-control">Get Authors</button>
+							</form>
+							<div id="authorTable"></div>
+						</div>
+						<div id="reviewer" class="container tab-pane fade"><br>
+						  <form class="form">
+								<input type="text" class="form-control" id="reviewername" placeholder="Enter Name" name="name">
+								<br>
+								<button type="button" class="form-control query" data-table="reviewer" id="reviewerbtn" class="btn btn-primary form-control">Get Reviewer</button>
+							</form>
+							<div id="reviewerTable"></div>
+						</div>
+					</div>
+				
+					
+				</div>				
+			</div>     
+		</div>     
+</body>
+</html>
