@@ -1,18 +1,30 @@
 package com.uic.demo.dao;
 
-import javax.persistence.EntityManager;
+import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class CustomNativeRepositoryImpl implements CustomNativeRepository {
 
 	@Autowired
-	private EntityManager entityManager;
+	private DataSource dataSource;
 
 	@Override
-	public Object runNativeQuery() {
-		return entityManager.createNativeQuery("select column_name from information_schema.columns where table_schema='knowledge_hub' and table_name='user'").getResultList();
+	public void init() {
+		Resource resource = new ClassPathResource("schema.sql");
+		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(resource);
+		databasePopulator.setSeparator("^;");
+		databasePopulator.execute(dataSource);
+
+		resource = new ClassPathResource("data.sql");
+		databasePopulator = new ResourceDatabasePopulator(resource);
+		databasePopulator.setSeparator("^;");
+		databasePopulator.execute(dataSource);
+
 	}
 }

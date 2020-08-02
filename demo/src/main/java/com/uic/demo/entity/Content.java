@@ -14,8 +14,8 @@ import org.hibernate.annotations.GenericGenerator;
 public class Content {
 
 	@Id
-	@GeneratedValue(strategy= GenerationType.AUTO,generator="native")
-	@GenericGenerator(name = "native",strategy = "native")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+	@GenericGenerator(name = "native", strategy = "native")
 	private Integer id;
 	private String name;
 	private String description;
@@ -27,18 +27,19 @@ public class Content {
 	private Reviewer reviewer;
 	private Boolean isActive;
 
-	public Content(String name, String description, Author author, Reviewer reviewer, Boolean isActive) {
+	public Content() {
 		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public Content(Integer id, String name, String description, Author author, Reviewer reviewer, Boolean isActive) {
+		super();
+		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.author = author;
 		this.reviewer = reviewer;
 		this.isActive = isActive;
-	}
-
-	public Content() {
-		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public Integer getId() {
